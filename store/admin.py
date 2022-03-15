@@ -1,4 +1,6 @@
+from ipaddress import collapse_addresses
 from django.contrib import admin, messages
+
 from . import models
 from django.db.models import Count
 from django.utils.html import format_html, urlencode
@@ -16,6 +18,7 @@ class InventoryFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == '<10':
             return queryset.filter(inventory__lt=10)
+
 
 
 @admin.register(models.Product)
