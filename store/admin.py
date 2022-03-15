@@ -20,8 +20,13 @@ class InventoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['collection']
+    prepopulated_fields = {
+        'slug': ['title']
+    }
     actions = ['clear_inventory']
     list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
+    search_fields = ['collection_title']
     list_editable = ['unit_price']
     list_filter = ['collection', 'last_update', InventoryFilter]
     list_per_page = 10
@@ -49,6 +54,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'membership','order_count']
+    search_fields = ['first_name', 'last_name']
     list_editable = ['membership']
     list_per_page = 10 
     ordering = ['first_name', 'last_name'] 
@@ -70,14 +76,26 @@ class CustomerAdmin(admin.ModelAdmin):
             order_count=Count('order')
         ) 
 
+
+class OrderItemInline(admin.TabularInline):
+    model = models.OrderItem
+    autocomplete_fields = ['product'] 
+    min_num = 1
+    max_num = 10
+    extra = 0
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'placed_at', 'customer']      
+    list_display = ['id', 'placed_at', 'customer']
+    inlines = [OrderItemInline]  
+    autocomplete_fields = ['customer']    
 
 
 @admin.register(models.Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['title', 'products_count']
+    search_fields = ['title']
 
     @admin.display(ordering='products_count')
     def products_count(self, collection):
